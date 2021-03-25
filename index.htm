@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Atvērto datu skatītājs
+    </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+<span id="app">
+    <div class="container-fluid">
+
+      <div class="row">
+          <div class="col-sm-6">
+            <label>Resursa ID</label> <input type="text" class="form-control" style="width:50%" v-model="resurss">
+            <label>Limits</label> <input type="number" class="form-control" style="width:50%" v-model="limits">
+              <button @click="ieladetnoapi" class="btn btn-success">Veidot izsaukumu</button><hr>
+              <label>Meklēt, ja satur: </label><input type="text" class="form-control" style="width:auto" v-model="meklejamavertiba" @change="ieladetnoapi();"> <hr>
+          </div>
+          <div class="col-sm-6">Datu glabātuves ietne ir https://data.gov.lv/ <br> Id:
+            https://data.gov.lv/dati/lv/dataset/covid-19/resource/<span style="color:red">dc3bac3e-0330-427e-bfe0-8d5cb0cf9383</span><hr>
+            Kopā rindas: {{atrada}}
+            <hr>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#resursi">
+              Iespējamie resursi
+            </button>
+          </div>
+      </div>
+        <div v-if="loading == true">
+          <img src="https://media0.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif">
+        </div>
+          <div class="alert alert-danger" v-if="error != ''">{{error}}</div>
+        </div>
+    </div>
+    <table class="table table-bordered" v-if="loading==false">
+        <tr>
+          <th v-for="g in masivs.fields">{{g.id}}</th>
+        </tr>
+        <tr v-for="dati in masivs.records">
+          <td v-for="g in masivs.fields">{{noforme(dati[g['id']],g['type'])}}</td>
+        </tr>
+
+      </table>
+      <div class="modal fade" id="resursi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="resursi">Iespējamie resursi</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+             <table class="table table-bordered">
+                <tr>
+                  <th>Nosaukums</th>
+                  <th>ID</th>
+                </tr>
+                <tr v-for="r in ieteiktie">
+                  <td>{{r.nos}}</td>
+                  <td><button @click="resurss=r.id;ieladetnoapi();" class="btn btn-default" data-dismiss="modal">{{r.id}}</button></td>
+                </tr>
+             </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Aizvērt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </span>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+<script src="src/js/index.js"></script>
+
+</html>
