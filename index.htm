@@ -21,7 +21,7 @@
           <div class="col-sm-6">
             <label>Resursa ID</label> <input type="text" class="form-control" style="width:50%" v-model="resurss">
             <label>Limits</label> <input type="number" class="form-control" style="width:50%" v-model="limits">
-              <button @click="ieladetnoapi" class="btn btn-success">Veidot izsaukumu</button><hr>
+              <button @click="ieladetnoapi" class="btn btn-success">Veidot izsaukumu</button>  <a href="https://github.com/kristapsmu/datagovlvapi">Skatīt iekš Github</a><hr>
               <label>Meklēt, ja satur: </label><input type="text" class="form-control" style="width:auto" v-model="meklejamavertiba" @change="ieladetnoapi();"> <hr>
           </div>
           <div class="col-sm-6">Datu glabātuves ietne ir https://data.gov.lv/ <br>Ietvars iegūst tabulu galvenes un automātiski tās atrāda. <br>Id:
@@ -31,6 +31,7 @@
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#resursi">
               Iespējamie resursi
             </button>
+
           </div>
       </div>
         <div v-if="loading == true">
