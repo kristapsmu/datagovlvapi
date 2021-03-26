@@ -2,13 +2,19 @@ let app = new Vue ({
     el: '#app',
     data: {
         resurss: "492931dd-0012-46d7-b415-76fe0ec7c216",
-        limits: 1000,
+        limits: 500,
         loading: false,
         error:"",
+        chartmax:100,
+        chartmin:0,
         mekletpec:"",
         meklejamavertiba:"",
+        selected_col:null,
         atrada: 0,
+        intervals: 100,
         masivs:{},
+        chartData: [],
+
         ieteiktie:[
             {nos:"COVID-19 izmeklējumi, apstiprinātie gadījumi un iznākumi",id:"d499d2f0-b1ea-4ba2-9600-2c701b03bd4a"},
             {nos:"Covid19_vakcinacija",id:"51725018-49f3-40d1-9280-2b13219e026f"},
@@ -36,6 +42,8 @@ let app = new Vue ({
                     sort:"_id desc"
                 },
                 success: function (data) {
+                    self.chartData =[];
+                    self.selected_col = null;
                     self.masivs = data.result;
                     self.atrada = data.result.total;
                     self.loading = false;
@@ -52,9 +60,36 @@ let app = new Vue ({
 
             if(formats == "timestamp"){
                 return new Date(vertiba).toLocaleDateString("lv-LV",{ year: 'numeric', month: 'long', day: 'numeric' });
+            }else if(formats == "timestampchart"){
+                return new Date(vertiba).toLocaleDateString("lv-LV",{ year: 'numeric', month: 'numeric', day: 'numeric' });
             }else{
                 return vertiba;
             }
+        },
+        make_chart: function(ids){
+            let arr = [];
+            let obj = this.masivs.records;
+            let lauks = "";
+            let self = this;
+            this.chartmax = 0;
+            this.chartmin = 0;
+            for (e in this.masivs.fields){
+
+                if (this.masivs.fields[e].type === "timestamp")  lauks = this.masivs.fields[e].id;
+            }
+            Object.keys(obj).forEach(function(key) {
+                let vertiba = parseInt(obj[key][ids]);
+                if(!isNaN(vertiba)){
+                    if(vertiba > self.chartmax) self.chartmax = parseInt(vertiba);
+                    if(vertiba < self.chartmin) self.chartmin = parseInt(vertiba);
+                    arr.push({ name: (lauks != "")? self.noforme(obj[key][lauks],"timestampchart"):"#"+key, pv: parseInt(vertiba)});
+                }
+            });
+           // this.intervals = self.chartmax/7;
+            this.chartData = arr.reverse();
+            
+            //make_chart
+            // /chartData
         }
     },
     created()

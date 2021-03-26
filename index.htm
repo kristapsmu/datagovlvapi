@@ -2,59 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Atvērto datu skatītājs</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="src/css/bootstrap.min.css" rel="stylesheet">
+    <script src="src/js/jquery.slim.min.js"></script>
+    <script src="src/js/popper.min.js"></script>
+    <script src="src/js/bootstrap.min.js"></script>
+    <script src="src/js/jquery.js"></script>
+    <script src="src/js/vue.js"></script>
+    <script src="src/js/laue.umd.js"></script>
+    <!-- &copy; Kristaps Muižnieks -->
 </head>
 
 <body>
 
 <span id="app">
     <div class="container-fluid">
-
-      <div class="row">
-          <div class="col-sm-6">
-            <label>Resursa ID</label> <input type="text" class="form-control" style="width:50%" v-model="resurss">
-            <label>Limits</label> <input type="number" class="form-control" style="width:50%" v-model="limits">
-              <button @click="ieladetnoapi" class="btn btn-success">Veidot izsaukumu</button>  <a href="https://github.com/kristapsmu/datagovlvapi">Skatīt iekš Github</a><hr>
-              <label>Meklēt, ja satur: </label><input type="text" class="form-control" style="width:auto" v-model="meklejamavertiba" @change="ieladetnoapi();"> <hr>
+        <div class="container">
+          <div class="jumbotron">
+            <h1>Atvērto datu skatītājs</h1>
+            <p>Šis ir piemērs kā izmantot API atvērto datu portālā attēlotajiem datiem, izmantojot VUE bibliotēku.</p>
+            <p>Bāzes vietne ir data.gov.lv, tabulu galvenes tiek veidotas automātiski bāzējoties uz iegūtajiem datiem.</p>
           </div>
-          <div class="col-sm-6">Datu glabātuves ietne ir https://data.gov.lv/ <br>Ietvars iegūst tabulu galvenes un automātiski tās atrāda. <br>Id:
+          <p>
+            <div class="row">
+          <div class="col-sm-6">
+            <label>Resursa ID</label> <input class="form-control" style="width:100%" type="text" v-model="resurss">
+            <label>Limits</label> <input class="form-control" style="width:50%" type="number" v-model="limits">
+              <button @click="ieladetnoapi" class="btn btn-success">Veidot izsaukumu</button>  <a
+                  href="https://github.com/kristapsmu/datagovlvapi">Skatīt iekš Github</a><hr>
+              <label>Meklēt, ja satur: </label><input class="form-control" style="width:auto"
+                                                      type="text" v-model="meklejamavertiba"> <button @click="ieladetnoapi();" class="btn btn-success">Meklēt</button> <hr>
+          </div>
+          <div class="col-sm-6"> <br>Id:
             https://data.gov.lv/dati/lv/dataset/covid-19/resource/<span style="color:red">dc3bac3e-0330-427e-bfe0-8d5cb0cf9383</span><hr>
             Kopā rindas: {{atrada}}
             <hr>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#resursi">
+            <button class="btn btn-primary" data-target="#resursi" data-toggle="modal" type="button">
               Iespējamie resursi
             </button>
 
           </div>
       </div>
-        <div v-if="loading == true">
+            </p>
+
+                <div v-if="chartData.length !== 0">Tiek rādīti {{chartData.length}} ieraksti. Diagrammai ir informatīvs raksturs.</div>
+                <la-cartesian :bound="[chartmin,chartmax+50]" v-if="chartData.length !== 0" :width="950" :height="600" :data="chartData">
+                        <la-line dot curve animated prop="pv"></la-line>
+                        <la-y-axis prop="pv" :interval="intervals" :format="v => Math.round(v)"></la-y-axis>
+                        <la-x-axis prop="name" :interval="i => i === 0 || i === chartData.length - 1 || i % 80 === 0"></la-x-axis>
+                        <la-tooltip></la-tooltip>
+                  </la-cartesian>
+        </trend>
+
+        </div>
+
+        <div v-if="loading === true">
           <img src="https://media0.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif">
         </div>
-          <div class="alert alert-danger" v-if="error != ''">{{error}}</div>
+          <div class="alert alert-danger" v-if="error !== ''">{{error}}</div>
         </div>
     </div>
-    <table class="table table-bordered" v-if="loading==false">
+    <div class="alert alert-danger" v-if="masivs.length === 0">Kļūda! Neatradu datus atrādīšanai!</div>
+    <table class="table table-bordered" v-if="loading===false">
         <tr>
-          <th v-for="g in masivs.fields">{{g.id}}</th>
+          <th v-for="g in masivs.fields">{{g.id}}<br><button class="btn btn-outline-info" @click="make_chart(g.id);selected_col=g.id">Grafiski</button></th>
         </tr>
         <tr v-for="dati in masivs.records">
-          <td v-for="g in masivs.fields">{{noforme(dati[g['id']],g['type'])}}</td>
+          <td v-for="g in masivs.fields" :class="g['id'] == selected_col ? 'table-danger':''">{{noforme(dati[g['id']], g['type'])}}</td>
         </tr>
 
       </table>
-      <div class="modal fade" id="resursi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="resursi" role="dialog"
+           tabindex="-1">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="resursi">Iespējamie resursi</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <h5 class="modal-title">Iespējamie resursi</h5>
+            <button aria-label="Close" class="close" data-dismiss="modal" type="button">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -66,18 +92,19 @@
                 </tr>
                 <tr v-for="r in ieteiktie">
                   <td>{{r.nos}}</td>
-                  <td><button @click="resurss=r.id;ieladetnoapi();" class="btn btn-default" data-dismiss="modal">{{r.id}}</button></td>
+                  <td><button @click="resurss=r.id;ieladetnoapi();" class="btn btn-default"
+                              data-dismiss="modal">{{r.id}}</button></td>
                 </tr>
              </table>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Aizvērt</button>
+            <button class="btn btn-secondary" data-dismiss="modal" type="button">Aizvērt</button>
           </div>
         </div>
       </div>
     </div>
   </span>
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+
 <script src="src/js/index.js"></script>
 </body>
 
