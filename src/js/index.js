@@ -87,7 +87,7 @@ let app = new Vue ({
             });
            // this.intervals = self.chartmax/7;
             this.chartData = arr.reverse();
-            
+
             //make_chart
             // /chartData
         }
